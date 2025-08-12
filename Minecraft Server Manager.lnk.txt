@@ -1,0 +1,9 @@
+This is a placeholder for a Windows shortcut file.
+
+To create a proper shortcut:
+1. Right-click on launch.bat
+2. Select "Create shortcut"
+3. Rename the shortcut to "Minecraft Server Manager"
+4. Optionally, right-click the shortcut, select Properties, and change the icon
+
+Note: .lnk files cannot be created directly through text editing, which is why this is a .txt file.
