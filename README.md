@@ -39,8 +39,7 @@ A comprehensive tool for managing multiple Minecraft Java Edition servers with b
 ### Quick Installation (Windows)
 
 1. Clone this repository or download the files
-2. Run the installation script:<img width="1024" height="280" alt="MCSpy" src="https://github.com/user-attachments/assets/15942d15-e1d8-45c8-ada3-25de85d47b2e" />
-
+2. Run the installation script:
 ```
    install.bat
 ```
