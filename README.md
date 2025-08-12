@@ -1,3 +1,5 @@
+<img width="1024" height="280" alt="MCSpy" src="https://github.com/user-attachments/assets/35bf8ca2-b5d2-4201-b4f8-b92e2ef28963" />
+
 # Minecraft Server Manager
 
 A comprehensive tool for managing multiple Minecraft Java Edition servers with both GUI and web interfaces, plus advanced development tools for converting Python code to Java for Minecraft plugin development.
@@ -37,7 +39,8 @@ A comprehensive tool for managing multiple Minecraft Java Edition servers with b
 ### Quick Installation (Windows)
 
 1. Clone this repository or download the files
-2. Run the installation script:
+2. Run the installation script:<img width="1024" height="280" alt="MCSpy" src="https://github.com/user-attachments/assets/15942d15-e1d8-45c8-ada3-25de85d47b2e" />
+
 ```
    install.bat
 ```
