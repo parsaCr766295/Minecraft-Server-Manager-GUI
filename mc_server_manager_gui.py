@@ -10,6 +10,17 @@ from pathlib import Path
 import sys
 
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
 # Import functions from the existing setup script
 try:
     from mc_server_setup import (
@@ -54,6 +65,14 @@ class MinecraftServerManagerGUI:
         self.root = root
         self.root.title("Minecraft Server Manager")
         self.root.geometry("1000x700")
+        
+        # Try to load icon (Windows)
+        try:
+            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
+            if os.path.exists(icon_path) and sys.platform == "win32":
+                self.root.iconbitmap(default=icon_path)
+        except Exception as e:
+            print(f"Could not load icon: {e}")
         
         # Initialize variables
         self.servers = []
@@ -150,6 +169,12 @@ class MinecraftServerManagerGUI:
     def show_file_menu(self):
         """Show file menu options"""
         file_menu = tk.Toplevel(self.root)
+        try:
+            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
+            if os.path.exists(icon_path) and sys.platform == "win32":
+                file_menu.iconbitmap(default=icon_path)
+        except Exception:
+            pass
         file_menu.title("File Menu")
         file_menu.geometry("250x300")
         file_menu.transient(self.root)
@@ -182,8 +207,14 @@ class MinecraftServerManagerGUI:
     def show_server_menu(self):
         """Show server menu options"""
         server_menu = tk.Toplevel(self.root)
+        try:
+            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
+            if os.path.exists(icon_path) and sys.platform == "win32":
+                server_menu.iconbitmap(default=icon_path)
+        except Exception:
+            pass
         server_menu.title("Server Menu")
-        server_menu.geometry("250x350")
+        server_menu.geometry("250x410")
         server_menu.transient(self.root)
         server_menu.grab_set()
         
@@ -215,8 +246,14 @@ class MinecraftServerManagerGUI:
     def show_tools_menu(self):
         """Show tools menu options"""
         tools_menu = tk.Toplevel(self.root)
+        try:
+            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
+            if os.path.exists(icon_path) and sys.platform == "win32":
+                tools_menu.iconbitmap(default=icon_path)
+        except Exception:
+            pass
         tools_menu.title("Tools Menu")
-        tools_menu.geometry("250x400")
+        tools_menu.geometry("250x410")
         tools_menu.transient(self.root)
         tools_menu.grab_set()
         
@@ -252,8 +289,14 @@ class MinecraftServerManagerGUI:
     def show_view_menu(self):
         """Show view menu options"""
         view_menu = tk.Toplevel(self.root)
+        try:
+            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
+            if os.path.exists(icon_path) and sys.platform == "win32":
+                view_menu.iconbitmap(default=icon_path)
+        except Exception:
+            pass
         view_menu.title("View Menu")
-        view_menu.geometry("250x300")
+        view_menu.geometry("250x400")
         view_menu.transient(self.root)
         view_menu.grab_set()
         
@@ -286,8 +329,14 @@ class MinecraftServerManagerGUI:
     def show_help_menu(self):
         """Show help menu options"""
         help_menu = tk.Toplevel(self.root)
+        try:
+            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
+            if os.path.exists(icon_path) and sys.platform == "win32":
+                help_menu.iconbitmap(default=icon_path)
+        except Exception:
+            pass
         help_menu.title("Help Menu")
-        help_menu.geometry("250x350")
+        help_menu.geometry("250x380")
         help_menu.transient(self.root)
         help_menu.grab_set()
         
@@ -314,7 +363,7 @@ class MinecraftServerManagerGUI:
         
         ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
         
-        ctk.CTkButton(menu_frame, text="About MCserver Py", command=lambda: [self.show_about(), help_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="About MCServer Py", command=lambda: [self.show_about(), help_menu.destroy()]).pack(fill='x', pady=2)
     
     def setup_server_list_tab(self):
         self.list_frame = self.notebook.add("Server List")
@@ -1529,6 +1578,12 @@ class MinecraftServerManagerGUI:
         import platform
         
         info_window = tk.Toplevel(self.root)
+        try:
+            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
+            if os.path.exists(icon_path) and sys.platform == "win32":
+                info_window.iconbitmap(default=icon_path)
+        except Exception:
+            pass
         info_window.title("System Information")
         info_window.geometry("400x300")
         info_window.transient(self.root)
@@ -1562,8 +1617,14 @@ Active Servers: {sum(1 for s in self.servers if s.process and s.process.poll() i
     def show_about(self):
         """Show about dialog"""
         about_window = tk.Toplevel(self.root)
-        about_window.title("About MCserver Py")
-        about_window.geometry("400x350")
+        try:
+            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
+            if os.path.exists(icon_path) and sys.platform == "win32":
+                about_window.iconbitmap(default=icon_path)
+        except Exception:
+            pass
+        about_window.title("About MCServer Py")
+        about_window.geometry("400x390")
         about_window.transient(self.root)
         about_window.grab_set()
         
@@ -1573,7 +1634,7 @@ Active Servers: {sum(1 for s in self.servers if s.process and s.process.poll() i
         title_label = ctk.CTkLabel(about_frame, text="Minecraft Server Manager", font=ctk.CTkFont(size=20, weight="bold"))
         title_label.pack(pady=10)
         
-        version_label = ctk.CTkLabel(about_frame, text="Version 1.2.1", font=ctk.CTkFont(size=14))
+        version_label = ctk.CTkLabel(about_frame, text="Version 1.2.2-pre", font=ctk.CTkFont(size=14))
         version_label.pack(pady=5)
         
         desc_text = ctk.CTkTextbox(about_frame, height=200)
