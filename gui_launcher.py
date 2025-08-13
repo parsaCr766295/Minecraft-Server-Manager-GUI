@@ -19,6 +19,14 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
+
+def get_app_dir():
+    """Return the application directory in both frozen (PyInstaller) and script modes."""
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+
 class MinecraftServerLauncher:
     def __init__(self, root):
         self.root = root
@@ -33,7 +41,7 @@ class MinecraftServerLauncher:
         
         # Try to load icon
         try:
-            icon_path = resource_path(os.path.join("icons", "launcher.svg"))
+            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
             if os.path.exists(icon_path):
                 # For Windows, use PhotoImage
                 if sys.platform == "win32":
@@ -113,9 +121,14 @@ class MinecraftServerLauncher:
     def launch_gui(self):
         if self.gui_process is None or self.gui_process.poll() is not None:
             try:
-                self.gui_process = subprocess.Popen([sys.executable, "mc_server_manager_gui.py"])
+                app_dir = get_app_dir()
+                gui_script = os.path.join(app_dir, "mc_server_manager_gui.py")
+                if not os.path.exists(gui_script):
+                    tk.messagebox.showerror("Error", f"GUI script not found:\n{gui_script}")
+                    return
+                self.gui_process = subprocess.Popen([sys.executable, gui_script], cwd=app_dir)
                 self.gui_status.configure(text="GUI: Running")
-                threading.Thread(target=self.monitor_process, args=(self.gui_process, self.gui_status, "GUI")).start()
+                threading.Thread(target=self.monitor_process, args=(self.gui_process, self.gui_status, "GUI"), daemon=True).start()
             except Exception as e:
                 tk.messagebox.showerror("Error", f"Failed to launch GUI: {str(e)}")
         else:
@@ -124,10 +137,15 @@ class MinecraftServerLauncher:
     def launch_python_web(self):
         if self.python_server_process is None or self.python_server_process.poll() is not None:
             try:
-                self.python_server_process = subprocess.Popen([sys.executable, "web_gui.py"])
+                app_dir = get_app_dir()
+                web_script = os.path.join(app_dir, "web_gui.py")
+                if not os.path.exists(web_script):
+                    tk.messagebox.showerror("Error", f"Python web script not found:\n{web_script}")
+                    return
+                self.python_server_process = subprocess.Popen([sys.executable, web_script], cwd=app_dir)
                 self.python_web_status.configure(text="Python Web: Running (http://localhost:5000)")
                 threading.Thread(target=self.monitor_process, 
-                               args=(self.python_server_process, self.python_web_status, "Python Web")).start()
+                               args=(self.python_server_process, self.python_web_status, "Python Web"), daemon=True).start()
                 # Open web browser after a short delay using the main thread
                 self.root.after(2000, lambda: webbrowser.open("http://localhost:5000"))
             except Exception as e:
@@ -147,11 +165,12 @@ class MinecraftServerLauncher:
                     return
                 
                 # Start PHP server
+                app_dir = get_app_dir()
                 self.php_server_process = subprocess.Popen(["php", "-S", "localhost:8000"], 
-                                                        cwd=os.path.dirname(os.path.abspath(__file__)))
+                                                        cwd=app_dir)
                 self.php_web_status.configure(text="PHP Web: Running (http://localhost:8000)")
                 threading.Thread(target=self.monitor_process, 
-                               args=(self.php_server_process, self.php_web_status, "PHP Web")).start()
+                               args=(self.php_server_process, self.php_web_status, "PHP Web"), daemon=True).start()
                 # Open web browser after a short delay using the main thread
                 self.root.after(2000, lambda: webbrowser.open("http://localhost:8000/index.php"))
             except Exception as e:
