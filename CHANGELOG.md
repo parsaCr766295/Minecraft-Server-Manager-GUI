@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.2-pre] - 2024-12-18 (Pre-release)
+
+### Added
+- Window icons throughout the application using `icons/launcher.ico`
+- Icon support for main GUI window and all popup dialogs/menus
+- Resource path handling for both development and PyInstaller builds
+
+### Fixed
+- Fixed GUI launcher reliability when launching Desktop GUI from different working directories
+- Improved absolute path handling in launcher for all script executions
+- Enhanced process monitoring with daemon threads for cleaner app exit
+- Added existence checks for script files before launching
+
+### Changed
+- GUI launcher now uses absolute paths and proper working directories
+- All Toplevel windows (menus, dialogs) now display the application icon
+- Improved error messages showing full paths when scripts are not found
+
 ## [1.2.1] - 2024-12-18
 
 ### Added
