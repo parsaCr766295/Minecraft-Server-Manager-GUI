@@ -79,6 +79,9 @@ class MinecraftServerManagerGUI:
         self.stopped_icon = "🔴"  # Red circle for stopped
         
     def setup_ui(self):
+        # Create menu bar
+        self.setup_menu_bar()
+        
         # Create main tabview for tabs
         self.notebook = ctk.CTkTabview(self.root)
         self.notebook.pack(fill='both', expand=True, padx=10, pady=10)
@@ -88,6 +91,230 @@ class MinecraftServerManagerGUI:
         self.setup_server_control_tab()
         self.setup_server_properties_tab()
         self.setup_settings_tab()
+    
+    def setup_menu_bar(self):
+        """Create a comprehensive menu bar for the application"""
+        # Create menu bar frame
+        self.menu_frame = ctk.CTkFrame(self.root, height=40)
+        self.menu_frame.pack(fill='x', padx=5, pady=(5, 0))
+        self.menu_frame.pack_propagate(False)
+        
+        # File Menu
+        self.file_menu_btn = ctk.CTkButton(
+            self.menu_frame, text="File", width=60, height=30,
+            command=self.show_file_menu
+        )
+        self.file_menu_btn.pack(side='left', padx=2, pady=5)
+        
+        # Server Menu
+        self.server_menu_btn = ctk.CTkButton(
+            self.menu_frame, text="Server", width=60, height=30,
+            command=self.show_server_menu
+        )
+        self.server_menu_btn.pack(side='left', padx=2, pady=5)
+        
+        # Tools Menu
+        self.tools_menu_btn = ctk.CTkButton(
+            self.menu_frame, text="Tools", width=60, height=30,
+            command=self.show_tools_menu
+        )
+        self.tools_menu_btn.pack(side='left', padx=2, pady=5)
+        
+        # View Menu
+        self.view_menu_btn = ctk.CTkButton(
+            self.menu_frame, text="View", width=60, height=30,
+            command=self.show_view_menu
+        )
+        self.view_menu_btn.pack(side='left', padx=2, pady=5)
+        
+        # Help Menu
+        self.help_menu_btn = ctk.CTkButton(
+            self.menu_frame, text="Help", width=60, height=30,
+            command=self.show_help_menu
+        )
+        self.help_menu_btn.pack(side='left', padx=2, pady=5)
+        
+        # Quick actions on the right
+        self.quick_new_btn = ctk.CTkButton(
+            self.menu_frame, text="+ New Server", width=100, height=30,
+            command=self.new_server, fg_color="#2E8B57", hover_color="#228B22"
+        )
+        self.quick_new_btn.pack(side='right', padx=5, pady=5)
+        
+        # Status indicator
+        self.status_indicator = ctk.CTkLabel(
+            self.menu_frame, text="Ready", width=100, height=30
+        )
+        self.status_indicator.pack(side='right', padx=5, pady=5)
+    
+    def show_file_menu(self):
+        """Show file menu options"""
+        file_menu = tk.Toplevel(self.root)
+        file_menu.title("File Menu")
+        file_menu.geometry("250x300")
+        file_menu.transient(self.root)
+        file_menu.grab_set()
+        
+        # Position near the File button
+        x = self.root.winfo_x() + 10
+        y = self.root.winfo_y() + 50
+        file_menu.geometry(f"+{x}+{y}")
+        
+        menu_frame = ctk.CTkFrame(file_menu)
+        menu_frame.pack(fill='both', expand=True, padx=10, pady=10)
+        
+        ctk.CTkButton(menu_frame, text="New Server", command=lambda: [self.new_server(), file_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Import Server Config", command=lambda: [self.import_server_config(), file_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Export Server Config", command=lambda: [self.export_server_config(), file_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Import Servers List", command=lambda: [self.import_servers_list(), file_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Export Servers List", command=lambda: [self.export_servers_list(), file_menu.destroy()]).pack(fill='x', pady=2)
+        
+        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
+        
+        ctk.CTkButton(menu_frame, text="Open Project Directory", command=lambda: [self.open_project_directory(), file_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Open Configs Directory", command=lambda: [self.open_configs_directory(), file_menu.destroy()]).pack(fill='x', pady=2)
+        
+        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
+        
+        ctk.CTkButton(menu_frame, text="Exit", command=lambda: [file_menu.destroy(), self.root.quit()], 
+                     fg_color="#E74C3C", hover_color="#C0392B").pack(fill='x', pady=2)
+    
+    def show_server_menu(self):
+        """Show server menu options"""
+        server_menu = tk.Toplevel(self.root)
+        server_menu.title("Server Menu")
+        server_menu.geometry("250x350")
+        server_menu.transient(self.root)
+        server_menu.grab_set()
+        
+        # Position near the Server button
+        x = self.root.winfo_x() + 70
+        y = self.root.winfo_y() + 50
+        server_menu.geometry(f"+{x}+{y}")
+        
+        menu_frame = ctk.CTkFrame(server_menu)
+        menu_frame.pack(fill='both', expand=True, padx=10, pady=10)
+        
+        # Server management
+        ctk.CTkLabel(menu_frame, text="Server Management", font=ctk.CTkFont(weight="bold")).pack(pady=5)
+        ctk.CTkButton(menu_frame, text="Create New Server", command=lambda: [self.new_server(), server_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Edit Selected Server", command=lambda: [self.edit_server(), server_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Delete Selected Server", command=lambda: [self.delete_server(), server_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Clone Selected Server", command=lambda: [self.clone_server(), server_menu.destroy()]).pack(fill='x', pady=2)
+        
+        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
+        
+        # Server control
+        ctk.CTkLabel(menu_frame, text="Server Control", font=ctk.CTkFont(weight="bold")).pack(pady=5)
+        ctk.CTkButton(menu_frame, text="Start Selected Server", command=lambda: [self.start_selected_server(), server_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Stop Selected Server", command=lambda: [self.stop_selected_server(), server_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Restart Selected Server", command=lambda: [self.restart_selected_server(), server_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Start All Servers", command=lambda: [self.start_all_servers(), server_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Stop All Servers", command=lambda: [self.stop_all_servers(), server_menu.destroy()]).pack(fill='x', pady=2)
+    
+    def show_tools_menu(self):
+        """Show tools menu options"""
+        tools_menu = tk.Toplevel(self.root)
+        tools_menu.title("Tools Menu")
+        tools_menu.geometry("250x400")
+        tools_menu.transient(self.root)
+        tools_menu.grab_set()
+        
+        # Position near the Tools button
+        x = self.root.winfo_x() + 130
+        y = self.root.winfo_y() + 50
+        tools_menu.geometry(f"+{x}+{y}")
+        
+        menu_frame = ctk.CTkFrame(tools_menu)
+        menu_frame.pack(fill='both', expand=True, padx=10, pady=10)
+        
+        # Development tools
+        ctk.CTkLabel(menu_frame, text="Development Tools", font=ctk.CTkFont(weight="bold")).pack(pady=5)
+        ctk.CTkButton(menu_frame, text="Python to Java Converter", command=lambda: [self.launch_py_to_java_converter(), tools_menu.destroy()]).pack(fill='x', pady=2)
+        
+        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
+        
+        # Server tools
+        ctk.CTkLabel(menu_frame, text="Server Tools", font=ctk.CTkFont(weight="bold")).pack(pady=5)
+        ctk.CTkButton(menu_frame, text="Check Java Installation", command=lambda: [self.check_java(), tools_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Download Server JAR", command=lambda: [self.download_server_jar(), tools_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Backup Server", command=lambda: [self.backup_server(), tools_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Restore Server", command=lambda: [self.restore_server(), tools_menu.destroy()]).pack(fill='x', pady=2)
+        
+        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
+        
+        # Web interfaces
+        ctk.CTkLabel(menu_frame, text="Web Interfaces", font=ctk.CTkFont(weight="bold")).pack(pady=5)
+        ctk.CTkButton(menu_frame, text="Launch Python Web GUI", command=lambda: [self.launch_python_web_gui(), tools_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Launch PHP Web GUI", command=lambda: [self.launch_php_web_gui(), tools_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Launch WebSocket Server", command=lambda: [self.launch_websocket_server(), tools_menu.destroy()]).pack(fill='x', pady=2)
+    
+    def show_view_menu(self):
+        """Show view menu options"""
+        view_menu = tk.Toplevel(self.root)
+        view_menu.title("View Menu")
+        view_menu.geometry("250x300")
+        view_menu.transient(self.root)
+        view_menu.grab_set()
+        
+        # Position near the View button
+        x = self.root.winfo_x() + 190
+        y = self.root.winfo_y() + 50
+        view_menu.geometry(f"+{x}+{y}")
+        
+        menu_frame = ctk.CTkFrame(view_menu)
+        menu_frame.pack(fill='both', expand=True, padx=10, pady=10)
+        
+        ctk.CTkLabel(menu_frame, text="Interface", font=ctk.CTkFont(weight="bold")).pack(pady=5)
+        ctk.CTkButton(menu_frame, text="Switch to Server List", command=lambda: [self.switch_to_tab("Server List"), view_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Switch to Server Setup", command=lambda: [self.switch_to_tab("Server Setup"), view_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Switch to Server Control", command=lambda: [self.switch_to_tab("Server Control"), view_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Switch to Server Properties", command=lambda: [self.switch_to_tab("Server Properties"), view_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Switch to Settings", command=lambda: [self.switch_to_tab("Settings"), view_menu.destroy()]).pack(fill='x', pady=2)
+        
+        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
+        
+        ctk.CTkLabel(menu_frame, text="Theme", font=ctk.CTkFont(weight="bold")).pack(pady=5)
+        ctk.CTkButton(menu_frame, text="Dark Mode", command=lambda: [self.change_appearance_mode("Dark"), view_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Light Mode", command=lambda: [self.change_appearance_mode("Light"), view_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="System Mode", command=lambda: [self.change_appearance_mode("System"), view_menu.destroy()]).pack(fill='x', pady=2)
+        
+        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
+        
+        ctk.CTkButton(menu_frame, text="Refresh All", command=lambda: [self.refresh_all(), view_menu.destroy()]).pack(fill='x', pady=2)
+    
+    def show_help_menu(self):
+        """Show help menu options"""
+        help_menu = tk.Toplevel(self.root)
+        help_menu.title("Help Menu")
+        help_menu.geometry("250x350")
+        help_menu.transient(self.root)
+        help_menu.grab_set()
+        
+        # Position near the Help button
+        x = self.root.winfo_x() + 250
+        y = self.root.winfo_y() + 50
+        help_menu.geometry(f"+{x}+{y}")
+        
+        menu_frame = ctk.CTkFrame(help_menu)
+        menu_frame.pack(fill='both', expand=True, padx=10, pady=10)
+        
+        ctk.CTkLabel(menu_frame, text="Documentation", font=ctk.CTkFont(weight="bold")).pack(pady=5)
+        ctk.CTkButton(menu_frame, text="User Guide", command=lambda: [self.open_user_guide(), help_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Quick Start Guide", command=lambda: [self.open_quick_start(), help_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="WebSocket Documentation", command=lambda: [self.open_websocket_docs(), help_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Installation Guide", command=lambda: [self.open_installation_guide(), help_menu.destroy()]).pack(fill='x', pady=2)
+        
+        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
+        
+        ctk.CTkLabel(menu_frame, text="Support", font=ctk.CTkFont(weight="bold")).pack(pady=5)
+        ctk.CTkButton(menu_frame, text="Report Issue", command=lambda: [self.report_issue(), help_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="Check for Updates", command=lambda: [self.check_for_updates(), help_menu.destroy()]).pack(fill='x', pady=2)
+        ctk.CTkButton(menu_frame, text="System Information", command=lambda: [self.show_system_info(), help_menu.destroy()]).pack(fill='x', pady=2)
+        
+        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
+        
+        ctk.CTkButton(menu_frame, text="About MCserver Py", command=lambda: [self.show_about(), help_menu.destroy()]).pack(fill='x', pady=2)
     
     def setup_server_list_tab(self):
         self.list_frame = self.notebook.add("Server List")
@@ -970,6 +1197,412 @@ class MinecraftServerManagerGUI:
                 subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', self.current_server.directory])
         except Exception as e:
             messagebox.showerror("Error", f"Could not open directory: {e}")
+    
+    # Menu Functions
+    def import_server_config(self):
+        """Import server configuration from file"""
+        file_path = filedialog.askopenfilename(
+            title="Import Server Config",
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")]
+        )
+        if file_path:
+            try:
+                with open(file_path, 'r') as f:
+                    config_data = json.load(f)
+                server = ServerConfig.from_dict(config_data)
+                server.name = self.generate_unique_name(server.name)
+                self.servers.append(server)
+                self.save_servers()
+                self.refresh_server_list()
+                messagebox.showinfo("Success", f"Server '{server.name}' imported successfully!")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to import server config: {e}")
+    
+    def export_server_config(self):
+        """Export selected server configuration to file"""
+        selected_server = self.get_selected_server()
+        if not selected_server:
+            messagebox.showwarning("No Selection", "Please select a server to export")
+            return
+        
+        file_path = filedialog.asksaveasfilename(
+            title="Export Server Config",
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
+            initialfile=f"{selected_server.name}_config.json"
+        )
+        if file_path:
+            try:
+                with open(file_path, 'w') as f:
+                    json.dump(selected_server.to_dict(), f, indent=4)
+                messagebox.showinfo("Success", f"Server config exported to {file_path}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to export server config: {e}")
+    
+    def import_servers_list(self):
+        """Import entire servers list from file"""
+        file_path = filedialog.askopenfilename(
+            title="Import Servers List",
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")]
+        )
+        if file_path:
+            try:
+                with open(file_path, 'r') as f:
+                    servers_data = json.load(f)
+                
+                imported_count = 0
+                for server_data in servers_data:
+                    server = ServerConfig.from_dict(server_data)
+                    server.name = self.generate_unique_name(server.name)
+                    self.servers.append(server)
+                    imported_count += 1
+                
+                self.save_servers()
+                self.refresh_server_list()
+                messagebox.showinfo("Success", f"Imported {imported_count} servers successfully!")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to import servers list: {e}")
+    
+    def export_servers_list(self):
+        """Export entire servers list to file"""
+        if not self.servers:
+            messagebox.showwarning("No Servers", "No servers to export")
+            return
+        
+        file_path = filedialog.asksaveasfilename(
+            title="Export Servers List",
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
+            initialfile="servers_list.json"
+        )
+        if file_path:
+            try:
+                servers_data = [server.to_dict() for server in self.servers]
+                with open(file_path, 'w') as f:
+                    json.dump(servers_data, f, indent=4)
+                messagebox.showinfo("Success", f"Servers list exported to {file_path}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to export servers list: {e}")
+    
+    def open_project_directory(self):
+        """Open the project directory"""
+        try:
+            project_dir = os.path.dirname(os.path.abspath(__file__))
+            if os.name == 'nt':  # Windows
+                os.startfile(project_dir)
+            elif os.name == 'posix':  # macOS and Linux
+                subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', project_dir])
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open project directory: {e}")
+    
+    def open_configs_directory(self):
+        """Open the configs directory"""
+        try:
+            config_dir = os.path.dirname(os.path.abspath(self.config_file))
+            if os.name == 'nt':  # Windows
+                os.startfile(config_dir)
+            elif os.name == 'posix':  # macOS and Linux
+                subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', config_dir])
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open configs directory: {e}")
+    
+    def clone_server(self):
+        """Clone the selected server"""
+        selected_server = self.get_selected_server()
+        if not selected_server:
+            messagebox.showwarning("No Selection", "Please select a server to clone")
+            return
+        
+        try:
+            # Create a new server based on the selected one
+            cloned_server = ServerConfig(
+                name=self.generate_unique_name(f"{selected_server.name}_copy"),
+                directory=selected_server.directory + "_copy",
+                version=selected_server.version,
+                min_memory=selected_server.min_memory,
+                max_memory=selected_server.max_memory,
+                nogui=selected_server.nogui,
+                eula_accepted=selected_server.eula_accepted
+            )
+            
+            self.servers.append(cloned_server)
+            self.save_servers()
+            self.refresh_server_list()
+            messagebox.showinfo("Success", f"Server '{cloned_server.name}' cloned successfully!")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to clone server: {e}")
+    
+    def restart_selected_server(self):
+        """Restart the selected server"""
+        selected_server = self.get_selected_server()
+        if selected_server:
+            self.stop_server(selected_server)
+            time.sleep(2)  # Wait a bit before restarting
+            self.start_server(selected_server)
+    
+    def start_all_servers(self):
+        """Start all servers"""
+        started_count = 0
+        for server in self.servers:
+            if not server.process or server.process.poll() is not None:
+                try:
+                    self.start_server(server)
+                    started_count += 1
+                except Exception as e:
+                    print(f"Failed to start {server.name}: {e}")
+        
+        messagebox.showinfo("Batch Start", f"Started {started_count} servers")
+        self.refresh_server_list()
+    
+    def stop_all_servers(self):
+        """Stop all running servers"""
+        stopped_count = 0
+        for server in self.servers:
+            if server.process and server.process.poll() is None:
+                try:
+                    self.stop_server(server)
+                    stopped_count += 1
+                except Exception as e:
+                    print(f"Failed to stop {server.name}: {e}")
+        
+        messagebox.showinfo("Batch Stop", f"Stopped {stopped_count} servers")
+        self.refresh_server_list()
+    
+    def launch_py_to_java_converter(self):
+        """Launch the Python to Java converter"""
+        try:
+            subprocess.Popen([sys.executable, "python_to_java_converter.py"])
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch Python to Java converter: {e}")
+    
+    def download_server_jar(self):
+        """Download server JAR file"""
+        # Switch to Server Setup tab and scroll to the top
+        self.notebook.set("Server Setup")
+        messagebox.showinfo("Download Server JAR", "Use the Server Setup tab to download and setup server JAR files")
+    
+    def backup_server(self):
+        """Backup selected server"""
+        selected_server = self.get_selected_server()
+        if not selected_server:
+            messagebox.showwarning("No Selection", "Please select a server to backup")
+            return
+        
+        if not os.path.exists(selected_server.directory):
+            messagebox.showwarning("Directory Not Found", f"Server directory does not exist: {selected_server.directory}")
+            return
+        
+        backup_dir = filedialog.askdirectory(title="Select Backup Directory")
+        if backup_dir:
+            try:
+                import shutil
+                backup_path = os.path.join(backup_dir, f"{selected_server.name}_backup_{int(time.time())}")
+                shutil.copytree(selected_server.directory, backup_path)
+                messagebox.showinfo("Success", f"Server backed up to: {backup_path}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to backup server: {e}")
+    
+    def restore_server(self):
+        """Restore server from backup"""
+        backup_dir = filedialog.askdirectory(title="Select Backup Directory to Restore")
+        if backup_dir:
+            try:
+                import shutil
+                server_name = os.path.basename(backup_dir).replace("_backup_", "_restored_")
+                restore_path = filedialog.askdirectory(title="Select Restore Location")
+                if restore_path:
+                    final_path = os.path.join(restore_path, server_name)
+                    shutil.copytree(backup_dir, final_path)
+                    messagebox.showinfo("Success", f"Server restored to: {final_path}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to restore server: {e}")
+    
+    def launch_python_web_gui(self):
+        """Launch the Python web GUI"""
+        try:
+            subprocess.Popen([sys.executable, "web_gui.py"])
+            messagebox.showinfo("Web GUI", "Python Web GUI launched. Check http://localhost:5000")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch Python web GUI: {e}")
+    
+    def launch_php_web_gui(self):
+        """Launch the PHP web GUI"""
+        try:
+            subprocess.Popen(["php", "-S", "localhost:8000"])
+            messagebox.showinfo("PHP Web GUI", "PHP Web GUI launched. Check http://localhost:8000")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch PHP web GUI. Make sure PHP is installed: {e}")
+    
+    def launch_websocket_server(self):
+        """Launch the WebSocket server"""
+        try:
+            subprocess.Popen([sys.executable, "websocket_server.py"])
+            messagebox.showinfo("WebSocket Server", "WebSocket server launched")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch WebSocket server: {e}")
+    
+    def switch_to_tab(self, tab_name):
+        """Switch to specified tab"""
+        try:
+            self.notebook.set(tab_name)
+        except Exception as e:
+            print(f"Could not switch to tab {tab_name}: {e}")
+    
+    def refresh_all(self):
+        """Refresh all data"""
+        self.refresh_server_list()
+        self.update_control_server_list()
+        self.load_server_properties()
+        self.status_indicator.configure(text="Refreshed")
+        self.root.after(2000, lambda: self.status_indicator.configure(text="Ready"))
+    
+    def open_user_guide(self):
+        """Open user guide documentation"""
+        try:
+            doc_path = "DOCUMENTATION.md"
+            if os.path.exists(doc_path):
+                if os.name == 'nt':  # Windows
+                    os.startfile(doc_path)
+                elif os.name == 'posix':  # macOS and Linux
+                    subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', doc_path])
+            else:
+                messagebox.showinfo("Documentation", "Documentation file not found. Please check the project directory.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open user guide: {e}")
+    
+    def open_quick_start(self):
+        """Open quick start guide"""
+        try:
+            readme_path = "README.md"
+            if os.path.exists(readme_path):
+                if os.name == 'nt':  # Windows
+                    os.startfile(readme_path)
+                elif os.name == 'posix':  # macOS and Linux
+                    subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', readme_path])
+            else:
+                messagebox.showinfo("Quick Start", "README file not found. Please check the project directory.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open quick start guide: {e}")
+    
+    def open_websocket_docs(self):
+        """Open WebSocket documentation"""
+        try:
+            ws_doc_path = "WEBSOCKET_README.md"
+            if os.path.exists(ws_doc_path):
+                if os.name == 'nt':  # Windows
+                    os.startfile(ws_doc_path)
+                elif os.name == 'posix':  # macOS and Linux
+                    subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', ws_doc_path])
+            else:
+                messagebox.showinfo("WebSocket Docs", "WebSocket documentation not found. Please check the project directory.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open WebSocket documentation: {e}")
+    
+    def open_installation_guide(self):
+        """Open installation guide"""
+        try:
+            install_path = "INSTALL.md"
+            if os.path.exists(install_path):
+                if os.name == 'nt':  # Windows
+                    os.startfile(install_path)
+                elif os.name == 'posix':  # macOS and Linux
+                    subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', install_path])
+            else:
+                messagebox.showinfo("Installation Guide", "Installation guide not found. Please check the project directory.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open installation guide: {e}")
+    
+    def report_issue(self):
+        """Open issue reporting page"""
+        try:
+            import webbrowser
+            webbrowser.open("https://github.com/parsaCr766295/Minecraft-Server-Manager-GUI/issues")
+        except Exception as e:
+            messagebox.showinfo("Report Issue", "Please visit the project's GitHub page to report issues.")
+    
+    def check_for_updates(self):
+        """Check for application updates"""
+        messagebox.showinfo("Updates", "Update checking not implemented yet. Please check the project repository for updates.")
+    
+    def show_system_info(self):
+        """Show system information dialog"""
+        import platform
+        
+        info_window = tk.Toplevel(self.root)
+        info_window.title("System Information")
+        info_window.geometry("400x300")
+        info_window.transient(self.root)
+        info_window.grab_set()
+        
+        info_frame = ctk.CTkFrame(info_window)
+        info_frame.pack(fill='both', expand=True, padx=10, pady=10)
+        
+        info_text = ctk.CTkTextbox(info_frame)
+        info_text.pack(fill='both', expand=True, padx=10, pady=10)
+        
+        system_info = f"""System Information:
+        
+Platform: {platform.platform()}
+System: {platform.system()}
+Release: {platform.release()}
+Version: {platform.version()}
+Machine: {platform.machine()}
+Processor: {platform.processor()}
+Python Version: {platform.python_version()}
+
+Java Status: {self.java_status.cget('text') if hasattr(self, 'java_status') else 'Unknown'}
+
+Servers Configured: {len(self.servers)}
+Active Servers: {sum(1 for s in self.servers if s.process and s.process.poll() is None)}
+"""
+        
+        info_text.insert("1.0", system_info)
+        info_text.configure(state="disabled")
+    
+    def show_about(self):
+        """Show about dialog"""
+        about_window = tk.Toplevel(self.root)
+        about_window.title("About MCserver Py")
+        about_window.geometry("400x350")
+        about_window.transient(self.root)
+        about_window.grab_set()
+        
+        about_frame = ctk.CTkFrame(about_window)
+        about_frame.pack(fill='both', expand=True, padx=10, pady=10)
+        
+        title_label = ctk.CTkLabel(about_frame, text="Minecraft Server Manager", font=ctk.CTkFont(size=20, weight="bold"))
+        title_label.pack(pady=10)
+        
+        version_label = ctk.CTkLabel(about_frame, text="Version 1.2.1", font=ctk.CTkFont(size=14))
+        version_label.pack(pady=5)
+        
+        desc_text = ctk.CTkTextbox(about_frame, height=200)
+        desc_text.pack(fill='both', expand=True, padx=10, pady=10)
+        
+        about_text = """Minecraft Server Manager
+
+A comprehensive tool for managing Minecraft servers with support for:
+• Multiple server configurations
+• Web-based management interfaces
+• Python to Java plugin conversion
+• WebSocket real-time communication
+• Server backup and restore
+• Automated server setup
+
+Features:
+- Desktop GUI (CustomTkinter)
+- Python Web Interface (Flask)
+- PHP Web Interface
+- WebSocket Server for real-time updates
+- Multi-platform support (Windows, macOS, Linux)
+
+Created with Python and CustomTkinter for modern, cross-platform server management.
+"""
+        
+        desc_text.insert("1.0", about_text)
+        desc_text.configure(state="disabled")
+        
+        ctk.CTkButton(about_frame, text="Close", command=about_window.destroy).pack(pady=10)
 
     def _stream_server_output(self, server):
         try:
