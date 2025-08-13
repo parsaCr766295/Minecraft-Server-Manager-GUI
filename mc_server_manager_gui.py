@@ -101,6 +101,24 @@ class MinecraftServerManagerGUI:
         # Create menu bar
         self.setup_menu_bar()
         
+        # Create status frame for status indicator and quick actions
+        self.status_frame = ctk.CTkFrame(self.root, height=30)
+        self.status_frame.pack(fill='x', padx=5, pady=(5, 0))
+        self.status_frame.pack_propagate(False)
+        
+        # Status indicator on the left
+        self.status_indicator = ctk.CTkLabel(
+            self.status_frame, text="Ready", width=100, height=25
+        )
+        self.status_indicator.pack(side='left', padx=5, pady=2)
+        
+        # Quick actions on the right
+        self.quick_new_btn = ctk.CTkButton(
+            self.status_frame, text="+ New Server", width=100, height=25,
+            command=self.new_server, fg_color="#2E8B57", hover_color="#228B22"
+        )
+        self.quick_new_btn.pack(side='right', padx=5, pady=2)
+        
         # Create main tabview for tabs
         self.notebook = ctk.CTkTabview(self.root)
         self.notebook.pack(fill='both', expand=True, padx=10, pady=10)
@@ -112,258 +130,129 @@ class MinecraftServerManagerGUI:
         self.setup_settings_tab()
     
     def setup_menu_bar(self):
-        """Create a comprehensive menu bar for the application"""
-        # Create menu bar frame
-        self.menu_frame = ctk.CTkFrame(self.root, height=40)
-        self.menu_frame.pack(fill='x', padx=5, pady=(5, 0))
-        self.menu_frame.pack_propagate(False)
+        """Create a comprehensive menu bar for the application using tkinter Menu"""
+        # Create menu bar
+        self.menu_bar = tk.Menu(self.root)
         
-        # File Menu
-        self.file_menu_btn = ctk.CTkButton(
-            self.menu_frame, text="File", width=60, height=30,
-            command=self.show_file_menu
-        )
-        self.file_menu_btn.pack(side='left', padx=2, pady=5)
+        # Create File menu
+        self.file_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.file_menu.add_command(label="New Server", command=self.new_server)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Import Server Config", command=self.import_server_config)
+        self.file_menu.add_command(label="Export Server Config", command=self.export_server_config)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Import Servers List", command=self.import_servers_list)
+        self.file_menu.add_command(label="Export Servers List", command=self.export_servers_list)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Open Project Directory", command=self.open_project_directory)
+        self.file_menu.add_command(label="Open Configs Directory", command=self.open_configs_directory)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Exit", command=self.root.quit)
         
-        # Server Menu
-        self.server_menu_btn = ctk.CTkButton(
-            self.menu_frame, text="Server", width=60, height=30,
-            command=self.show_server_menu
-        )
-        self.server_menu_btn.pack(side='left', padx=2, pady=5)
+        # Add File menu to menu bar
+        self.menu_bar.add_cascade(label="File", menu=self.file_menu)
         
-        # Tools Menu
-        self.tools_menu_btn = ctk.CTkButton(
-            self.menu_frame, text="Tools", width=60, height=30,
-            command=self.show_tools_menu
-        )
-        self.tools_menu_btn.pack(side='left', padx=2, pady=5)
+        # Create Server menu
+        self.server_menu = tk.Menu(self.menu_bar, tearoff=0)
+        # Server Management submenu
+        self.server_mgmt_menu = tk.Menu(self.server_menu, tearoff=0)
+        self.server_mgmt_menu.add_command(label="Create New Server", command=self.new_server)
+        self.server_mgmt_menu.add_command(label="Edit Selected Server", command=self.edit_server)
+        self.server_mgmt_menu.add_command(label="Delete Selected Server", command=self.delete_server)
+        self.server_mgmt_menu.add_command(label="Clone Selected Server", command=self.clone_server)
         
-        # View Menu
-        self.view_menu_btn = ctk.CTkButton(
-            self.menu_frame, text="View", width=60, height=30,
-            command=self.show_view_menu
-        )
-        self.view_menu_btn.pack(side='left', padx=2, pady=5)
+        # Server Control submenu
+        self.server_control_menu = tk.Menu(self.server_menu, tearoff=0)
+        self.server_control_menu.add_command(label="Start Selected Server", command=self.start_selected_server)
+        self.server_control_menu.add_command(label="Stop Selected Server", command=self.stop_selected_server)
+        self.server_control_menu.add_command(label="Restart Selected Server", command=self.restart_selected_server)
+        self.server_control_menu.add_separator()
+        self.server_control_menu.add_command(label="Start All Servers", command=self.start_all_servers)
+        self.server_control_menu.add_command(label="Stop All Servers", command=self.stop_all_servers)
         
-        # Help Menu
-        self.help_menu_btn = ctk.CTkButton(
-            self.menu_frame, text="Help", width=60, height=30,
-            command=self.show_help_menu
-        )
-        self.help_menu_btn.pack(side='left', padx=2, pady=5)
+        self.server_menu.add_cascade(label="Server Management", menu=self.server_mgmt_menu)
+        self.server_menu.add_cascade(label="Server Control", menu=self.server_control_menu)
         
-        # Quick actions on the right
-        self.quick_new_btn = ctk.CTkButton(
-            self.menu_frame, text="+ New Server", width=100, height=30,
-            command=self.new_server, fg_color="#2E8B57", hover_color="#228B22"
-        )
-        self.quick_new_btn.pack(side='right', padx=5, pady=5)
+        # Add Server menu to menu bar
+        self.menu_bar.add_cascade(label="Server", menu=self.server_menu)
         
-        # Status indicator
-        self.status_indicator = ctk.CTkLabel(
-            self.menu_frame, text="Ready", width=100, height=30
-        )
-        self.status_indicator.pack(side='right', padx=5, pady=5)
+        # Create Tools menu
+        self.tools_menu = tk.Menu(self.menu_bar, tearoff=0)
+        # Development Tools submenu
+        self.dev_tools_menu = tk.Menu(self.tools_menu, tearoff=0)
+        self.dev_tools_menu.add_command(label="Python to Java Converter", command=self.launch_py_to_java_converter)
+        
+        # Server Tools submenu
+        self.server_tools_menu = tk.Menu(self.tools_menu, tearoff=0)
+        self.server_tools_menu.add_command(label="Check Java Installation", command=self.check_java)
+        self.server_tools_menu.add_command(label="Download Server JAR", command=self.download_server_jar)
+        self.server_tools_menu.add_command(label="Backup Server", command=self.backup_server)
+        self.server_tools_menu.add_command(label="Restore Server", command=self.restore_server)
+        
+        # Web Interfaces submenu
+        self.web_interfaces_menu = tk.Menu(self.tools_menu, tearoff=0)
+        self.web_interfaces_menu.add_command(label="Launch Python Web GUI", command=self.launch_python_web_gui)
+        self.web_interfaces_menu.add_command(label="Launch PHP Web GUI", command=self.launch_php_web_gui)
+        self.web_interfaces_menu.add_command(label="Launch WebSocket Server", command=self.launch_websocket_server)
+        
+        self.tools_menu.add_cascade(label="Development Tools", menu=self.dev_tools_menu)
+        self.tools_menu.add_cascade(label="Server Tools", menu=self.server_tools_menu)
+        self.tools_menu.add_cascade(label="Web Interfaces", menu=self.web_interfaces_menu)
+        
+        # Add Tools menu to menu bar
+        self.menu_bar.add_cascade(label="Tools", menu=self.tools_menu)
+        
+        # Create View menu
+        self.view_menu = tk.Menu(self.menu_bar, tearoff=0)
+        # Interface submenu
+        self.interface_menu = tk.Menu(self.view_menu, tearoff=0)
+        self.interface_menu.add_command(label="Switch to Server List", command=lambda: self.switch_to_tab("Server List"))
+        self.interface_menu.add_command(label="Switch to Server Setup", command=lambda: self.switch_to_tab("Server Setup"))
+        self.interface_menu.add_command(label="Switch to Server Control", command=lambda: self.switch_to_tab("Server Control"))
+        self.interface_menu.add_command(label="Switch to Server Properties", command=lambda: self.switch_to_tab("Server Properties"))
+        self.interface_menu.add_command(label="Switch to Settings", command=lambda: self.switch_to_tab("Settings"))
+        
+        # Theme submenu
+        self.theme_menu = tk.Menu(self.view_menu, tearoff=0)
+        self.theme_menu.add_command(label="Dark Mode", command=lambda: self.change_appearance_mode("Dark"))
+        self.theme_menu.add_command(label="Light Mode", command=lambda: self.change_appearance_mode("Light"))
+        self.theme_menu.add_command(label="System Mode", command=lambda: self.change_appearance_mode("System"))
+        
+        self.view_menu.add_cascade(label="Interface", menu=self.interface_menu)
+        self.view_menu.add_cascade(label="Theme", menu=self.theme_menu)
+        self.view_menu.add_separator()
+        self.view_menu.add_command(label="Refresh All", command=self.refresh_all)
+        
+        # Add View menu to menu bar
+        self.menu_bar.add_cascade(label="View", menu=self.view_menu)
+        
+        # Create Help menu
+        self.help_menu = tk.Menu(self.menu_bar, tearoff=0)
+        # Documentation submenu
+        self.documentation_menu = tk.Menu(self.help_menu, tearoff=0)
+        self.documentation_menu.add_command(label="User Guide", command=self.open_user_guide)
+        self.documentation_menu.add_command(label="Quick Start Guide", command=self.open_quick_start)
+        self.documentation_menu.add_command(label="WebSocket Documentation", command=self.open_websocket_docs)
+        self.documentation_menu.add_command(label="Installation Guide", command=self.open_installation_guide)
+        
+        # Support submenu
+        self.support_menu = tk.Menu(self.help_menu, tearoff=0)
+        self.support_menu.add_command(label="Report Issue", command=self.report_issue)
+        self.support_menu.add_command(label="Check for Updates", command=self.check_for_updates)
+        self.support_menu.add_command(label="System Information", command=self.show_system_info)
+        
+        self.help_menu.add_cascade(label="Documentation", menu=self.documentation_menu)
+        self.help_menu.add_cascade(label="Support", menu=self.support_menu)
+        self.help_menu.add_separator()
+        self.help_menu.add_command(label="About MCServer Py", command=self.show_about)
+        
+        # Add Help menu to menu bar
+        self.menu_bar.add_cascade(label="Help", menu=self.help_menu)
+        
+        # Set the menu bar for the window
+        self.root.config(menu=self.menu_bar)
     
-    def show_file_menu(self):
-        """Show file menu options"""
-        file_menu = tk.Toplevel(self.root)
-        try:
-            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
-            if os.path.exists(icon_path) and sys.platform == "win32":
-                file_menu.iconbitmap(default=icon_path)
-        except Exception:
-            pass
-        file_menu.title("File Menu")
-        file_menu.geometry("250x300")
-        file_menu.transient(self.root)
-        file_menu.grab_set()
-        
-        # Position near the File button
-        x = self.root.winfo_x() + 10
-        y = self.root.winfo_y() + 50
-        file_menu.geometry(f"+{x}+{y}")
-        
-        menu_frame = ctk.CTkFrame(file_menu)
-        menu_frame.pack(fill='both', expand=True, padx=10, pady=10)
-        
-        ctk.CTkButton(menu_frame, text="New Server", command=lambda: [self.new_server(), file_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Import Server Config", command=lambda: [self.import_server_config(), file_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Export Server Config", command=lambda: [self.export_server_config(), file_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Import Servers List", command=lambda: [self.import_servers_list(), file_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Export Servers List", command=lambda: [self.export_servers_list(), file_menu.destroy()]).pack(fill='x', pady=2)
-        
-        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
-        
-        ctk.CTkButton(menu_frame, text="Open Project Directory", command=lambda: [self.open_project_directory(), file_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Open Configs Directory", command=lambda: [self.open_configs_directory(), file_menu.destroy()]).pack(fill='x', pady=2)
-        
-        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
-        
-        ctk.CTkButton(menu_frame, text="Exit", command=lambda: [file_menu.destroy(), self.root.quit()], 
-                     fg_color="#E74C3C", hover_color="#C0392B").pack(fill='x', pady=2)
-    
-    def show_server_menu(self):
-        """Show server menu options"""
-        server_menu = tk.Toplevel(self.root)
-        try:
-            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
-            if os.path.exists(icon_path) and sys.platform == "win32":
-                server_menu.iconbitmap(default=icon_path)
-        except Exception:
-            pass
-        server_menu.title("Server Menu")
-        server_menu.geometry("250x410")
-        server_menu.transient(self.root)
-        server_menu.grab_set()
-        
-        # Position near the Server button
-        x = self.root.winfo_x() + 70
-        y = self.root.winfo_y() + 50
-        server_menu.geometry(f"+{x}+{y}")
-        
-        menu_frame = ctk.CTkFrame(server_menu)
-        menu_frame.pack(fill='both', expand=True, padx=10, pady=10)
-        
-        # Server management
-        ctk.CTkLabel(menu_frame, text="Server Management", font=ctk.CTkFont(weight="bold")).pack(pady=5)
-        ctk.CTkButton(menu_frame, text="Create New Server", command=lambda: [self.new_server(), server_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Edit Selected Server", command=lambda: [self.edit_server(), server_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Delete Selected Server", command=lambda: [self.delete_server(), server_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Clone Selected Server", command=lambda: [self.clone_server(), server_menu.destroy()]).pack(fill='x', pady=2)
-        
-        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
-        
-        # Server control
-        ctk.CTkLabel(menu_frame, text="Server Control", font=ctk.CTkFont(weight="bold")).pack(pady=5)
-        ctk.CTkButton(menu_frame, text="Start Selected Server", command=lambda: [self.start_selected_server(), server_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Stop Selected Server", command=lambda: [self.stop_selected_server(), server_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Restart Selected Server", command=lambda: [self.restart_selected_server(), server_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Start All Servers", command=lambda: [self.start_all_servers(), server_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Stop All Servers", command=lambda: [self.stop_all_servers(), server_menu.destroy()]).pack(fill='x', pady=2)
-    
-    def show_tools_menu(self):
-        """Show tools menu options"""
-        tools_menu = tk.Toplevel(self.root)
-        try:
-            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
-            if os.path.exists(icon_path) and sys.platform == "win32":
-                tools_menu.iconbitmap(default=icon_path)
-        except Exception:
-            pass
-        tools_menu.title("Tools Menu")
-        tools_menu.geometry("250x410")
-        tools_menu.transient(self.root)
-        tools_menu.grab_set()
-        
-        # Position near the Tools button
-        x = self.root.winfo_x() + 130
-        y = self.root.winfo_y() + 50
-        tools_menu.geometry(f"+{x}+{y}")
-        
-        menu_frame = ctk.CTkFrame(tools_menu)
-        menu_frame.pack(fill='both', expand=True, padx=10, pady=10)
-        
-        # Development tools
-        ctk.CTkLabel(menu_frame, text="Development Tools", font=ctk.CTkFont(weight="bold")).pack(pady=5)
-        ctk.CTkButton(menu_frame, text="Python to Java Converter", command=lambda: [self.launch_py_to_java_converter(), tools_menu.destroy()]).pack(fill='x', pady=2)
-        
-        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
-        
-        # Server tools
-        ctk.CTkLabel(menu_frame, text="Server Tools", font=ctk.CTkFont(weight="bold")).pack(pady=5)
-        ctk.CTkButton(menu_frame, text="Check Java Installation", command=lambda: [self.check_java(), tools_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Download Server JAR", command=lambda: [self.download_server_jar(), tools_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Backup Server", command=lambda: [self.backup_server(), tools_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Restore Server", command=lambda: [self.restore_server(), tools_menu.destroy()]).pack(fill='x', pady=2)
-        
-        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
-        
-        # Web interfaces
-        ctk.CTkLabel(menu_frame, text="Web Interfaces", font=ctk.CTkFont(weight="bold")).pack(pady=5)
-        ctk.CTkButton(menu_frame, text="Launch Python Web GUI", command=lambda: [self.launch_python_web_gui(), tools_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Launch PHP Web GUI", command=lambda: [self.launch_php_web_gui(), tools_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Launch WebSocket Server", command=lambda: [self.launch_websocket_server(), tools_menu.destroy()]).pack(fill='x', pady=2)
-    
-    def show_view_menu(self):
-        """Show view menu options"""
-        view_menu = tk.Toplevel(self.root)
-        try:
-            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
-            if os.path.exists(icon_path) and sys.platform == "win32":
-                view_menu.iconbitmap(default=icon_path)
-        except Exception:
-            pass
-        view_menu.title("View Menu")
-        view_menu.geometry("250x400")
-        view_menu.transient(self.root)
-        view_menu.grab_set()
-        
-        # Position near the View button
-        x = self.root.winfo_x() + 190
-        y = self.root.winfo_y() + 50
-        view_menu.geometry(f"+{x}+{y}")
-        
-        menu_frame = ctk.CTkFrame(view_menu)
-        menu_frame.pack(fill='both', expand=True, padx=10, pady=10)
-        
-        ctk.CTkLabel(menu_frame, text="Interface", font=ctk.CTkFont(weight="bold")).pack(pady=5)
-        ctk.CTkButton(menu_frame, text="Switch to Server List", command=lambda: [self.switch_to_tab("Server List"), view_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Switch to Server Setup", command=lambda: [self.switch_to_tab("Server Setup"), view_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Switch to Server Control", command=lambda: [self.switch_to_tab("Server Control"), view_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Switch to Server Properties", command=lambda: [self.switch_to_tab("Server Properties"), view_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Switch to Settings", command=lambda: [self.switch_to_tab("Settings"), view_menu.destroy()]).pack(fill='x', pady=2)
-        
-        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
-        
-        ctk.CTkLabel(menu_frame, text="Theme", font=ctk.CTkFont(weight="bold")).pack(pady=5)
-        ctk.CTkButton(menu_frame, text="Dark Mode", command=lambda: [self.change_appearance_mode("Dark"), view_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Light Mode", command=lambda: [self.change_appearance_mode("Light"), view_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="System Mode", command=lambda: [self.change_appearance_mode("System"), view_menu.destroy()]).pack(fill='x', pady=2)
-        
-        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
-        
-        ctk.CTkButton(menu_frame, text="Refresh All", command=lambda: [self.refresh_all(), view_menu.destroy()]).pack(fill='x', pady=2)
-    
-    def show_help_menu(self):
-        """Show help menu options"""
-        help_menu = tk.Toplevel(self.root)
-        try:
-            icon_path = resource_path(os.path.join("icons", "launcher.ico"))
-            if os.path.exists(icon_path) and sys.platform == "win32":
-                help_menu.iconbitmap(default=icon_path)
-        except Exception:
-            pass
-        help_menu.title("Help Menu")
-        help_menu.geometry("250x380")
-        help_menu.transient(self.root)
-        help_menu.grab_set()
-        
-        # Position near the Help button
-        x = self.root.winfo_x() + 250
-        y = self.root.winfo_y() + 50
-        help_menu.geometry(f"+{x}+{y}")
-        
-        menu_frame = ctk.CTkFrame(help_menu)
-        menu_frame.pack(fill='both', expand=True, padx=10, pady=10)
-        
-        ctk.CTkLabel(menu_frame, text="Documentation", font=ctk.CTkFont(weight="bold")).pack(pady=5)
-        ctk.CTkButton(menu_frame, text="User Guide", command=lambda: [self.open_user_guide(), help_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Quick Start Guide", command=lambda: [self.open_quick_start(), help_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="WebSocket Documentation", command=lambda: [self.open_websocket_docs(), help_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Installation Guide", command=lambda: [self.open_installation_guide(), help_menu.destroy()]).pack(fill='x', pady=2)
-        
-        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
-        
-        ctk.CTkLabel(menu_frame, text="Support", font=ctk.CTkFont(weight="bold")).pack(pady=5)
-        ctk.CTkButton(menu_frame, text="Report Issue", command=lambda: [self.report_issue(), help_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="Check for Updates", command=lambda: [self.check_for_updates(), help_menu.destroy()]).pack(fill='x', pady=2)
-        ctk.CTkButton(menu_frame, text="System Information", command=lambda: [self.show_system_info(), help_menu.destroy()]).pack(fill='x', pady=2)
-        
-        ctk.CTkFrame(menu_frame, height=2).pack(fill='x', pady=5)  # Separator
-        
-        ctk.CTkButton(menu_frame, text="About MCServer Py", command=lambda: [self.show_about(), help_menu.destroy()]).pack(fill='x', pady=2)
+
     
     def setup_server_list_tab(self):
         self.list_frame = self.notebook.add("Server List")
@@ -1634,7 +1523,7 @@ Active Servers: {sum(1 for s in self.servers if s.process and s.process.poll() i
         title_label = ctk.CTkLabel(about_frame, text="Minecraft Server Manager", font=ctk.CTkFont(size=20, weight="bold"))
         title_label.pack(pady=10)
         
-        version_label = ctk.CTkLabel(about_frame, text="Version 1.2.2-pre", font=ctk.CTkFont(size=14))
+        version_label = ctk.CTkLabel(about_frame, text="Version 1.3.0", font=ctk.CTkFont(size=14))
         version_label.pack(pady=5)
         
         desc_text = ctk.CTkTextbox(about_frame, height=200)
