@@ -84,6 +84,13 @@ Run the desktop application:
 python mc_server_manager_gui.py
 ```
 
+Menu Bar Overview:
+- File: New Server, Import/Export configs and server lists, Open Project/Configs directories, Exit
+- Server: Server Management (New/Edit/Delete/Clone) and Server Control (Start/Stop/Restart selected, Start/Stop all)
+- Tools: Development Tools (Python to Java Converter), Server Tools (Java check, Download JAR, Backup/Restore), Web Interfaces (Python/PHP Web GUI, WebSocket Server)
+- View: Interface (switch tabs) and Theme (Dark/Light/System), Refresh All
+- Help: Documentation (User/Quick Start/WebSocket/Installation) and Support (Report Issue, Check Updates, System Info), About
+
 ### Web Interface
 
 #### Python Web Server
