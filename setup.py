@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="minecraft-server-manager",
-    version="1.2.2-pre",
+    version="1.3.0",
     description="A comprehensive tool for managing Minecraft Java Edition servers",
     author="AsanCraft DEv",
     packages=find_packages(),
